@@ -19,13 +19,37 @@ public:
     p=p.next();
     return this;
   }
-  Iterator operator++(int);
-  Iterator& operator--();
-  Iterator& operator--(int);
-  bool operator==(const Iterator& other) const;
-  bool operator+=(const Iterator& other) const;
-  T& operator*();
-  T* operator->();
+  Iterator operator++(int){ 
+    Iterator i = this;
+    p = p.next();
+    return i;
+  }
+
+  Iterator& operator--(){
+    p=p.prev();
+    return this;
+  }
+
+  Iterator& operator--(int){
+    Iterator i = this;
+    p = p.prev();
+    return i;
+  }
+
+  bool operator==(const Iterator& other) const{
+    return *p = other;
+  }
+  bool operator!=(const Iterator& other) const{
+    return *p != other;
+  }
+
+  T& operator*(){
+    return *p;
+  }
+
+  T* operator->(){
+    return p;
+  }
 
 };
 
