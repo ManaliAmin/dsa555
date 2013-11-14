@@ -64,10 +64,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\Downloads\a2tester\table.h" />
+    <ClInclude Include="ChainHash.h" />
+    <ClInclude Include="LPHash.h" />
+    <ClInclude Include="Simple.h" />
+    <ClInclude Include="table.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\Downloads\a2tester\a2tester.cpp" />
+    <ClCompile Include="a2tester.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
