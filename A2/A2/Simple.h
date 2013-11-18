@@ -3,6 +3,7 @@
 #include "table.h"
 #include <vector>
 
+/*
 template <typename Key_t, typename Val_t>
 class Simple : public Table<Val_t>
 {
@@ -48,10 +49,15 @@ public:
 
     _store.push_back(toInsert);
 
-    iterator i = _store.begin();    
-    while (_store[i]->_key < key)
-      i++;
-    
+    iterator i = _store.end();    
+    while (i < _store.begin()){
+      if(_store[i]->_key > key)
+        i--;
+      i = i+1;
+    }     
+
+    i = i+1;
+           
     tmp = _store[i];
     
     _store[i] = toInsert;    
@@ -59,27 +65,15 @@ public:
     for( i = i+1 ; i < _store.end() ; i++){
       _store[i+1] = _store[i];
 
+    _store[i] = tmp;
+
    }  
         
     if(_store[size()]){
       _store.resize(2* _size);       
 
 
-  }
-
-  void sort(int startIndex, int endIndex)
-  {
-    int pivot = array[startIndex];                 
-    int splitPoint;
-
-    if(endIndex > startIndex)                        
-    {
-      splitPoint = SplitArray(array, pivot, startIndex, endIndex);
-      _store[splitPoint] = pivot;
-      sort(startIndex, splitPoint-1);  
-      sort(splitPoint+1, endIndex);   
-    }
-  }
+   } 
  
 
   virtual bool remove(const Key_t& key){
@@ -112,7 +106,7 @@ public:
 
 };
 
-
+*/
 
 #define __NM_SIMPLE_H__
 #endif

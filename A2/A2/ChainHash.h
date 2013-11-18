@@ -1,5 +1,5 @@
 #ifndef __CHAIN_H__
-
+/*
 #include "table.h"
 #include <list>
 #include <vector>
@@ -89,7 +89,7 @@ public:
   }
 
 
-};
+}; */
 
 
 #define __CHAIN_H__

@@ -1,5 +1,5 @@
 #ifndef __NM_LP_H__
-
+/*
 #include <vector>
 #include "table.h"
 
@@ -110,7 +110,7 @@ public:
   }
 
 };
-
+*/
 
 #define __NM_LP_H
 

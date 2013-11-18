@@ -2,7 +2,9 @@
 #define TEST_LPHASH 1       // Set this to 0 to turn off testing of LPHash table
 #define TEST_CHAINHASH 1    // Set this to 0 to turn off testing of ChainHash table
 
-#include "table.h"  // Note: you may not need to change this!
+#include "table.h"
+
+// Note: you may not need to change this!
                     // If you defined your classes in a file other than table.h
                     // then include it here instead of table.h
 

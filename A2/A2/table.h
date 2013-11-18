@@ -1,16 +1,30 @@
 #ifndef __TABLE_H__
 #define __TABLE_H__
 
-// This is a minimal implementation of table.h
-// Feel free to use this one as a starting point or to write your own.
-// Also, please remove this comment block and replace it with something more
-// appropriate if you end up using this definition.
-template <typename Key_t, typename Val_t> class Table {
-  /*struct Item
-  {
-    Key_t _key;
-    Val_t val;
-  };*/
+/*Student Assignment Submission Form
+==================================
+I/we declare that the attached assignment is my/our own work in accordance with
+Seneca Academic Policy.  No part of this assignment has been copied manually or 
+electronically from any other source (including web sites) or distributed to other 
+students.
+
+Name(s)                                             Student ID(s)
+
+Natesh Mayuranathan               							    046643086
+
+*/
+
+#include <vector>
+#include <iterator>
+#include <functional>
+#include <list>
+
+/************************************************************************/
+/* This abstract base class defines pure virtual functions for the tasks
+/* that the various hash table implementations must perform
+/************************************************************************/
+
+template <typename Key_t, typename Val_t> class Table {  
 public:
     virtual Val_t* find(const Key_t& key) = 0;
     virtual bool insert(const Key_t& key, const Val_t& val) = 0;
@@ -18,5 +32,316 @@ public:
     virtual int size() const = 0;
     virtual ~Table(){}
 };
+
+template <typename Key_t, typename Val_t>
+class Simple : public Table<Key_t, Val_t>
+{
+private:
+  struct Item
+  {
+    Key_t _key;
+    Val_t _val;
+
+    Item(Key_t k, Val_t v){this->_key = k; this->_val = v;}
+    Item(){}
+  };
+  std::vector<Item> _store;
+  int _size;
+  int _load;
+public:
+
+  Simple(int initialCapacity){
+    _size = initialCapacity;
+    _store.reserve(_size);
+    _load = 0;
+  }
+
+  /************************************************************************
+   * Performs a binary search of the sorted array table that returns      * 
+   * either the value associated with the key requested or a nullptr      *
+   * (not found)                                                          *  
+  /************************************************************************/
+  virtual Val_t* find(const Key_t& key){
+
+    if(size() == 0) return nullptr;
+
+    int min=0, max = size(), mid = max/2;
+
+    while(max >= min){
+      if (_store[mid]._key < key)
+        min = mid+1;
+      else if (_store[mid]._key > key)
+        max = mid-1;
+      else
+        return &_store[mid]._val;
+    }
+  }
+
+  /************************************************************************
+   * Attempts to insert a new item into the table, given const references *
+   * to a key and a value - returns false if key exists in table
+  /************************************************************************/
+  virtual bool insert(const Key_t& key, const Val_t& val){
+    if(find(key)) return false;
+
+    int end = size();
+
+    if(_load == size())
+      _store.reserve(2 * size());
+
+    Item toInsert = new Item(key, val);
+    toInsert._val = val;
+    toInsert._key = key;
+    Item tmp;
+    int swap = -1;
+    _store.push_back(toInsert);
+
+    int i = size() - 1;
+    
+    while (i > 0 && toInsert._key < _store[i-1]._key )
+      i--;
+  
+    swap = --i;
+    tmp = _store[i];
+    _store[i] = toInsert;
+
+    for( i = i+1 ; i < size() ; i++)
+      _store[i+1] = _store[i];
+
+    _store[swap] = tmp;      
+
+    _load++;
+    
+    } 
+
+
+    virtual bool remove(const Key_t& key){
+      if(!find(key)) return false;
+
+      int idx = 0;
+      bool rv = true;
+      Item toDel = nullptr;
+
+      for(; idx < size() & _store[idx]->key < key ; idx++);
+
+      toDel = _store[idx];
+
+      do{
+        _store[idx] = _store[idx+1];
+      }while (idx < size());
+
+      delete _store[size()];
+      delete toDel;
+      return true;
+    }
+    virtual int size() const{ return _store.size(); }
+
+    virtual ~Simple(){
+      for(std::iterator i = _store.end(); i = _store.begin(); i--)
+        delete _store[i];
+      delete this;
+    }
+
+
+  };
+
+template <typename Key_t, typename Val_t> 
+class LPHash : public Table<Key_t, Val_t> {
+  struct Item
+  {
+    Key_t _key;
+    Val_t _val;
+  };
+  std::vector<Item> _store;
+  int _load;
+  int _size;
+  std::hash<Key_t> _hash;
+public:
+
+  LPHash(int maxExpected){    
+    _size = 1.25 * maxExpected;
+    _store = new std::vector<Item>(_size);
+  }
+
+  virtual Val_t* find(const Key_t& key){
+
+    int end = _store.size();
+
+    auto ideal = _hash(key) % end;
+    for(int i = 0; i < end && _store[(ideal +1) % end]; i++ ){
+      if(_store[(ideal + i) % end]._key == key)
+        return &_store[(ideal + i) % end] -> _val;
+    }
+
+    return nullptr;
+  }
+  virtual bool insert(const Key_t& key, const Val_t& val) {        
+
+    if (find(key)) return false;    
+    int end = _store.size();
+    auto ideal = _hash(key) % end;
+    int insertion = -1;
+
+    if(_store[ideal]){
+      for(int i = ideal+1; i < _store.end() && insertion < 0; i++){
+        if(!_store[i])
+          insertion = i;
+      }
+      if (i == _store.end()){
+        for(i = 0; i < ideal; i++){
+          if(!_store[i])
+            insertion = i;
+        }    
+      }
+    } else
+      insertion = ideal;
+
+
+    _store[insertion] = new Item(_key, _val);
+    _load++;
+    if ( size() == (1.25 * _load))
+      rehash();
+
+    return true;
+
+  }
+  virtual bool remove(const Key_t& key) {
+
+    if(!find(key)) return false;
+
+    int end = store.size();
+    auto ideal = _hash(key) % end;
+    //Item temp = nullptr;    
+    int removal = -1;
+    int i=-1;
+
+    if(_store[ideal]._key == key)
+      removal = ideal;
+    else
+    {
+      for(i = ideal; i < _store.end() && removal < 0 ; i++ ){
+        if(_store[i]._key == key)
+          removal = i;
+      }
+
+      if(i == _store.end()){
+        for(i = 0 ; i < ideal; i++){
+          if(_store[i]._key == key)
+            removal = i;
+        }
+      }
+    }
+
+    delete _store[removal];
+    _load--;
+    return true;
+
+
+  }
+  virtual int size() const { return _size; }
+
+  void rehash(){
+    std::vector<Item> resized = new std::vector<Item>(2 * _size);
+    for(int i = 0; i < _store.size(); i++)
+      resized[i] = _store[i];
+  }
+
+  virtual ~LPHash(){
+    for(int i = store.size()-1; i =0 ; i--)
+      remove(store[i]._key);
+
+    delete[] _store;
+  }
+
+};
+
+template <typename Key_t, typename Val_t>
+class ChainHash : public Table<Key_t, Val_t> {
+  struct Item
+  {
+    Key_t _key;
+    Val_t _val;    
+  };  
+  std::vector<std::list<Item>> _store;
+  std::hash<Key_t> _hash;
+  //maximum elements in table
+  int _capacity;
+  //maximum acceptable load of each bucket
+  int _maxload;
+  int _end;
+  int _buckets;
+public:
+
+  ChainHash(int maxExpected){
+    _capacity = 1.25 * maxExpected;
+    _buckets = 10;
+    _maxload = maxExpected / _buckets;
+    _store = new std::vector<std::list<Item>>(maxExpected);    
+  }
+
+  virtual Val_t* find(const Key_t& key) {            
+    auto ideal = _hash(key) % _capacity;
+
+    for(std::list<Item>::iterator i = _store[ideal].begin(); i < _store[i].end(); i++){
+      if(*i._key == key)
+        return &i._val;
+    }
+
+    return nullptr;
+
+  }
+  virtual bool insert(const Key_t& key, const Val_t& val) {
+    if(find(key))return false;
+
+    auto ideal = _hash(key) % _capacity;
+    int size = _store[ideal].size();
+
+    _store[ideal].push_back(new Item(key, val));
+
+    if(_store[ideal].size() == _maxload)
+      resize();
+
+
+  }
+  virtual bool remove(const Key_t& key) {
+
+    if(!find(key)) return false;
+
+    auto ideal = _hash(key) % _capacity;
+    int size = _store[ideal].size();
+    Item tmp = nullptr;
+
+    for(std::list<Item>::iterator i = _store[ideal].begin(); i < _store[i].end(); i++){
+      if(*i._key == key){
+        tmp = *i;
+        *i-1
+
+      }
+
+    }
+
+  }
+  virtual int size() const {return _capacity;}
+  virtual ~ChainHash(){
+    for(int i = 0; i < _capacity; i++)
+      _store[i].clear();
+  }
+
+  void resize(){    
+    int expanded = _capacity * 2;
+    std::vector<std::list<Item>> resized = new std::vector<std::list<Item>>(expanded);    
+    _maxload = (expanded/1.25)/10;
+
+    for(int i = 0; i < _capacity; i++){
+      if(_store[i].begin())
+        resized[i] = _store[i];
+    }
+
+  }
+
+
+};
+
+
 
 #endif
