@@ -1,5 +1,5 @@
-#define TEST_SIMPLE 1       // Set this to 0 to turn off testing of simple table
-#define TEST_LPHASH 0       // Set this to 0 to turn off testing of LPHash table
+#define TEST_SIMPLE 0       // Set this to 0 to turn off testing of simple table
+#define TEST_LPHASH 1       // Set this to 0 to turn off testing of LPHash table
 #define TEST_CHAINHASH 0    // Set this to 0 to turn off testing of ChainHash table
 
 #include "table.h"

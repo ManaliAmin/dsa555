@@ -18,6 +18,7 @@ Natesh Mayuranathan               							    046643086
 #include <iterator>
 #include <functional>
 #include <list>
+#include <iostream>
 
 /************************************************************************/
 /* This abstract base class defines pure virtual functions for the tasks
@@ -62,9 +63,11 @@ public:
 
     if(size() == 0) return nullptr;
 
-    int min=0, max = size(), mid = max/2;
+    int min=0, max = size(), mid=0;
 
     while(max >= min){
+      mid = min + (max-min)/2;
+      if (mid==size()) break;
       if (_store[mid]._key < key)
         min = mid+1;
       else if (_store[mid]._key > key)
@@ -88,7 +91,7 @@ public:
 
     int i = 0;    
     if(size() > 0){
-      while (toInsert._key < _store[i]._key )
+      while ( i <size() && toInsert._key > _store[i]._key )
         i++;
     } 
 
@@ -138,7 +141,7 @@ class LPHash : public Table<Key_t, Val_t> {
 public:
 
   LPHash(int maxExpected) : _load(0){    
-    _store = new std::vector<Item>(1.25 * maxExpected);
+    _store.reserve(1.25 * maxExpected);
 
   }
 
@@ -147,9 +150,9 @@ public:
     int end = _store.size();
 
     auto ideal = _hash(key) % end;
-    for(int i = 0; i < end && _store[(i+1) % end]; i++ ){
+    for(int i = 0; i < end && &_store[(i+1) % end]; i++ ){
       if(_store[(ideal + i) % end]._key == key){
-        return &_store[(ideal + i) % end] -> _val;
+        return &_store[(ideal + i) % end]._val;
       }
     }
 
