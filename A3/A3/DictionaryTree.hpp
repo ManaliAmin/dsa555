@@ -1,76 +1,147 @@
 #include "A3Interfaces.hpp"
 
-#include <vector>
-
 class WordNode : public iWordNode{
-private:
-	char _letter;
-  std::vector<WordNode*> children;	
-	size_t _numChildren;
-	bool _isWholeWord;
+private:  
+  WordNode* children[26];	
+  size_t _numChildWords;
+  bool _isWholeWord;
+protected:
+
 public:
-  WordNode(){
-		children.reserve(26);	
-	}
+  WordNode() : _numChildWords(0), _isWholeWord(false){    
+    for(int i = 0; i < 26; i++)
+      children[i]=nullptr;
+  }  
 
+  /**
+  * Attempts to insert a character in the appropriate
+  * position
+  */
+  void insert(WordNode* curr, const char* word){
 
-	/**
-	 * Attempts to insert a word's individual characters
-	 * into the node and its chidlren as needed
-	 */
-	virtual void insert(const char* word){
-		int indices = getNumChildren();
-		int sz = word.size();
-		for(int i = 0; i < sz ; i++){
-			if(!children[atoi(word[i])])
+    if(!word)
+      return;
 
-		}
-	}	
+    //Get leading char from word and extract ASCII character
+    char c = word[0];
+    int code = c - 97;
+
+    //perform insertion at appropriate node, provided it is empty
+    if(!curr->children[code])
+      curr->children[code] =  new WordNode();
+    //set complete word marker as necessary
+    if(!word[1]){
+      curr->children[code]->_isWholeWord = true;
+      curr->_numChildWords++;
+    }
+    else{
+      //continue to insert remaining characters in word
+      insert(curr->children[code], word+1);      
+    }    
+
+  }
 
   /**
   Returns a pointer to an iWordNode instance at the given letter.
   If none exist, this function should return nullptr.
   */
-  virtual WordNode* getChild(char letter){
-		int sz = getNumChildren();
-		for(int i = 0 ; i < sz; i++){
-			if(children[i]._letter == letter)
-				return &children[i];
-		}
-		return nullptr;
-	}
+  virtual WordNode* getChild(char letter){    
+    int pos = letter - 97;
 
+    if(children[pos])
+      return children[pos];
+
+    return nullptr;
+  }  
+
+  WordNode* find(WordNode* curr, const char* wordSegment){
+
+    if(!curr || !wordSegment) return nullptr;
+
+    int code = wordSegment[0];
+
+    if(curr->getChild(code)){
+      if(!wordSegment[1])
+        return curr->getChild(code);
+      return find(curr->getChild(wordSegment[0]), wordSegment+1);
+    } else  
+      return nullptr;
+
+  }
 
   /**
   Returns the total number of children that this node and all of its
   subtrees contain.
   */
-  virtual size_t getNumChildren() const{ return _numChildren; }
+  virtual size_t getNumChildWords() const{ 
+
+    size_t total = 0;
+
+    for(int i=0; i < 26;i++){
+      if(children[i] && children[i]->isWholeWord())
+        total++;
+      total+=getTotChildWords(children[i], total);
+    }
+
+    return total;
+
+  }  
+
+  size_t getTotChildWords(WordNode* curr, int recursiveTotal) const{   
+
+    if(!curr)
+      return 0;
+
+    for(int i=0; i < 26;i++){
+      if(children[i] && children[i]->isWholeWord())
+        recursiveTotal++;
+      recursiveTotal+=getTotChildWords(children[i], recursiveTotal);
+    }
+
+    return recursiveTotal;
+
+
+  }
 
   /**
   Returns true if this instance is at the end of a whole word,
   false otherwise.
   */
-  virtual bool isWholeWord() const{ return _isWholeWord; }
+  virtual bool isWholeWord() const{ 
+    if(this)
+      return _isWholeWord; 
+  }
+
+  void remove(WordNode* curr){
+
+    if(!curr)
+      return;
+
+    for(int i=0; i<26 ; i++)
+      remove(children[i]);
+
+    delete[] children;
+
+
+  }
 
   /**
   Virtual destructor.
   */
   virtual ~WordNode(){
-		
-	}
-
+    remove(this);
+  }
 
 };
 
 class DictionaryTree
 {
 private:
-  WordNode* _root;
+  WordNode _root;
 public:
   DictionaryTree(){
-		_root = new WordNode();
-	}
+
+  }
 
   /**
   Inserts a "whole word" into the tree.
@@ -80,8 +151,17 @@ public:
   it is marked as a whole word.
   */
   virtual void insert(const char* word){
-		
-	}
+
+    if (!word)
+      return;
+
+    WordNode* r = getRoot();   
+
+    //call recursive function to perform nodal insertion
+    r->insert(r, word);
+
+  }
+
 
   /**
   Attempts to find the node associated with a given word.
@@ -90,14 +170,20 @@ public:
   If the word is not found in the tree, nullptr is returned.
   If the word is found, a pointer to it is returned.
   */
-  virtual WordNode* getNodeForWord(const char* word){}
+  virtual WordNode* getNodeForWord(const char* word){    
+
+    return getRoot()->find(getRoot(), word);
+
+  }
 
   /**
   Simply returns the root node of the tree.
   */
-  virtual WordNode* getRoot(){ return _root; }
+  virtual WordNode* getRoot(){ return &_root; }
 
-  virtual ~DictionaryTree(){}
+  virtual ~DictionaryTree(){
+    getRoot()->remove(getRoot());
+  }
 
 
 };

@@ -24,7 +24,7 @@ public:
         Returns the total number of children that this node and all of its
         subtrees contain.
      */
-    virtual size_t getNumChildren() const = 0;
+    virtual size_t getNumChildWords() const = 0;
 
     /**
         Returns true if this instance is at the end of a whole word,

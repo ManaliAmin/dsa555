@@ -8,9 +8,9 @@ class Iterator{
 private:
   Node<T>* p;
 public:
-  Iterator(){ p = nullptr; }
+  Iterator(){ p = NULL; }
   Iterator(const Iterator& src){
-    this = src;
+    p = src->p;
   }
   Iterator& operator=(const Iterator& src){
    return this=src; 
@@ -21,35 +21,37 @@ public:
   }
   Iterator operator++(int){ 
     Iterator i = this;
-    p = p.next();
+    p = p->next();
     return i;
   }
 
   Iterator& operator--(){
-    p=p.prev();
+    p=p->prev();
     return this;
   }
 
   Iterator& operator--(int){
     Iterator i = this;
-    p = p.prev();
+    p = p->prev();
     return i;
   }
 
   bool operator==(const Iterator& other) const{
-    return *p = other;
+    return p == other.p;
   }
   bool operator!=(const Iterator& other) const{
-    return *p != other;
+    return p != other.p;
   }
 
   T& operator*(){
-    return *p;
+    return p->data;
   }
 
   T* operator->(){
-    return p;
+    return &p->data;
   }
+
+  void set(T& data){ p = data; }
 
 };
 

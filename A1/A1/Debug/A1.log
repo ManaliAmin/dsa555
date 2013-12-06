@@ -1,0 +1,32 @@
+﻿Build started 12/5/2013 5:48:13 PM.
+     1>Project "E:\Documents\Code\repos\dsa555\A1\A1\A1.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt tester.cpp
+         tester.cpp
+     1>e:\documents\code\repos\dsa555\a1\a1\list.h(124): error C2228: left of '.next' must have class/struct/union
+                 type is 'Node<T> *const '
+                 with
+                 [
+                     T=int
+                 ]
+                 did you intend to use '->' instead?
+                 e:\documents\code\repos\dsa555\a1\a1\list.h(124) : while compiling class template member function 'int &LinkedList<T>::front(void) const'
+                 with
+                 [
+                     T=int
+                 ]
+                 e:\documents\code\repos\dsa555\a1\a1\tester.cpp(345) : see reference to function template instantiation 'int &LinkedList<T>::front(void) const' being compiled
+                 with
+                 [
+                     T=int
+                 ]
+                 e:\documents\code\repos\dsa555\a1\a1\tester.cpp(336) : see reference to class template instantiation 'LinkedList<T>' being compiled
+                 with
+                 [
+                     T=int
+                 ]
+     1>Done Building Project "E:\Documents\Code\repos\dsa555\A1\A1\A1.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:00.59

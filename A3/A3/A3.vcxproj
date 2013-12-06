@@ -66,6 +66,10 @@
   <ItemGroup>
     <ClInclude Include="A3Interfaces.hpp" />
     <ClInclude Include="DictionaryTree.hpp" />
+    <ClInclude Include="tester.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="a3tester.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

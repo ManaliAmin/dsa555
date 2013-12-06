@@ -65,9 +65,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Iterator.h" />
-    <ClInclude Include="LinkedList.h" />
+    <ClInclude Include="list.h" />
     <ClInclude Include="Node.h" />
-    <ClInclude Include="RecursiveSolver.h" />
+    <ClInclude Include="recurse.hpp" />
+    <ClInclude Include="tester.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="tester.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

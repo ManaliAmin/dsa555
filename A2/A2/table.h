@@ -128,20 +128,25 @@ public:
 
 };
 
+/************************************************************************/
+/* Linear Probing Hash Table implementation of abstract Table class     */
+/************************************************************************/
 template <typename Key_t, typename Val_t> 
 class LPHash : public Table<Key_t, Val_t> {
   struct Item
   {
     Key_t _key;
     Val_t _val;
+    Item(Key_t k, Val_t v) : _key(k), _val(v) {}
+    Key_t key(){ return _key;}
   };
-  std::vector<Item> _store;
+  std::vector<Item*> _store;
   int _load;
   std::hash<Key_t> _hash;
 public:
 
   LPHash(int maxExpected) : _load(0){    
-    _store.reserve(1.25 * maxExpected);
+    _store.resize(1.25 * maxExpected);
 
   }
 
@@ -151,8 +156,8 @@ public:
 
     auto ideal = _hash(key) % end;
     for(int i = 0; i < end && &_store[(i+1) % end]; i++ ){
-      if(_store[(ideal + i) % end]._key == key){
-        return &_store[(ideal + i) % end]._val;
+      if(_store[(ideal + i) % end]->_key == key){
+        return &_store[(ideal + i) % end]->_val;
       }
     }
 
@@ -164,13 +169,14 @@ public:
     int end = _store.size();
     auto ideal = _hash(key) % end;
     int insertion = -1;
+    int i=0;
 
-    if(_store[ideal]){
-      for(int i = ideal+1; i < _store.size() && insertion < 0; i++){
+    if(_store[ideal]!=NULL){
+      for(i = ideal+1; i < end && insertion < 0; i++){
         if(!_store[i])
           insertion = i;
       }
-      if (i == _store.end()){
+      if (i == end){
         for(i = 0; i < ideal; i++){
           if(!_store[i])
             insertion = i;
@@ -180,7 +186,7 @@ public:
       insertion = ideal;
 
 
-    _store[insertion] = new Item(_key, _val);
+    _store[insertion] = new Item(key, val);
     _load++;
     if ( size() == (1.25 * _load))
       rehash();
@@ -192,24 +198,24 @@ public:
 
     if(!find(key)) return false;
 
-    int end = store.size();
-    auto ideal = _hash(key) % end;
-    //Item temp = nullptr;    
+    int end = _store.size();
+    auto ideal = _hash(key) % end; 
+    Item toDel = *_store[ideal];
     int removal = -1;
     int i=-1;
 
-    if(_store[ideal]._key == key)
+    if(toDel->key() == key)
       removal = ideal;
     else
     {
-      for(i = ideal; i < _store.end() && removal < 0 ; i++ ){
-        if(_store[i]._key == key)
+      for(i = ideal; i < end && removal < 0 ; i++ ){
+        if(_store[i]->_key == key)
           removal = i;
       }
 
-      if(i == _store.end()){
+      if(i == end){
         for(i = 0 ; i < ideal; i++){
-          if(_store[i]._key == key)
+          if(_store[i]->_key == key)
             removal = i;
         }
       }
@@ -238,6 +244,9 @@ public:
 
 };
 
+/************************************************************************/
+/* Chained Hash Table implementation of abstract Table class            */
+/************************************************************************/
 template <typename Key_t, typename Val_t>
 class ChainHash : public Table<Key_t, Val_t> {
   struct Item
@@ -245,13 +254,12 @@ class ChainHash : public Table<Key_t, Val_t> {
     Key_t _key;
     Val_t _val;    
   };  
-  std::vector<std::list<Item>> _store;
+  std::vector<std::list<Item*>> _store;
   std::hash<Key_t> _hash;
   //maximum elements in table
   int _capacity;
   //maximum acceptable load of each bucket
-  int _maxload;
-  int _end;
+  int _maxload;  
   int _buckets;
 public:
 
@@ -259,15 +267,19 @@ public:
     _capacity = 1.25 * maxExpected;
     _buckets = 10;
     _maxload = maxExpected / _buckets;
-    _store = new std::vector<std::list<Item>>(maxExpected);    
+    _store.reserve(1.25*maxExpected);    
   }
 
   virtual Val_t* find(const Key_t& key) {            
     auto ideal = _hash(key) % _capacity;
 
-    for(std::list<Item>::iterator i = _store[ideal].begin(); i < _store[i].end(); i++){
-      if(*i._key == key)
-        return &i._val;
+    std::list<Item*> list = &_store.at(ideal);
+
+    if(list->size()){
+      for(std::list::iterator i = list->begin(); i != list->end(); i++){
+        if((*i)->_key == key)
+          return (*i)->_value;
+      }      
     }
 
     return nullptr;
@@ -289,12 +301,13 @@ public:
   virtual bool remove(const Key_t& key) {
 
     if(!find(key)) return false;
+    
 
     auto ideal = _hash(key) % _capacity;
     int size = _store[ideal].size();
     Item tmp = nullptr;
 
-    for(std::list<Item>::iterator i = _store[ideal].begin(); i < _store[i].end(); i++){
+    for(std::list<Item>::iterator i = _store[ideal].begin(); i < _store[i].end(); i++){      
       if(*i._key == key){
         tmp = *i;
         *i-1
