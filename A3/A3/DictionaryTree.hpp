@@ -1,5 +1,18 @@
 #include "A3Interfaces.hpp"
 
+/*Student Assignment Submission Form
+==================================
+I/we declare that the attached assignment is my/our own work in accordance with
+Seneca Academic Policy.  No part of this assignment has been copied manually or 
+electronically from any other source (including web sites) or distributed to other 
+students.
+
+Name(s)                                             Student ID(s)
+
+Natesh Mayuranathan               							    046643086
+
+*/
+
 class WordNode : public iWordNode{
 private:  
   WordNode* children[26];	
@@ -8,6 +21,9 @@ private:
 protected:
 
 public:
+  /**
+  * Default constructor - initialises node into usable state
+  */
   WordNode() : _numChildWords(0), _isWholeWord(false){    
     for(int i = 0; i < 26; i++)
       children[i]=nullptr;
@@ -32,7 +48,6 @@ public:
     //set complete word marker as necessary
     if(!word[1]){
       curr->children[code]->_isWholeWord = true;
-      curr->_numChildWords++;
     }
     else{
       //continue to insert remaining characters in word
@@ -54,6 +69,10 @@ public:
     return nullptr;
   }  
 
+  /**
+    Recursively searches a subtree for all the characters 
+    in a passed word
+  */
   WordNode* find(WordNode* curr, const char* wordSegment){
 
     if(!curr || !wordSegment) return nullptr;
@@ -61,8 +80,10 @@ public:
     int code = wordSegment[0];
 
     if(curr->getChild(code)){
+      //base case -> return WordNode* to final character in sequences
       if(!wordSegment[1])
         return curr->getChild(code);
+      //recursive case -> continue to search using further indices in word segment
       return find(curr->getChild(wordSegment[0]), wordSegment+1);
     } else  
       return nullptr;
@@ -70,66 +91,51 @@ public:
   }
 
   /**
-  Returns the total number of children that this node and all of its
-  subtrees contain.
+    Returns the total number of children that this node and all of its
+    subtrees contain.
   */
   virtual size_t getNumChildWords() const{ 
-
-    size_t total = 0;
-
-    for(int i=0; i < 26;i++){
-      if(children[i] && children[i]->isWholeWord())
-        total++;
-      total+=getTotChildWords(children[i], total);
-    }
-
-    return total;
-
+    return getTotChildWords(this);
   }  
 
-  size_t getTotChildWords(WordNode* curr, int recursiveTotal) const{   
-
+  /**
+    Recursively traverse subtree and retrieve total of word ending nodes
+  **/
+  static size_t getTotChildWords(const WordNode* curr){
     if(!curr)
       return 0;
 
+    int recursiveTotal = 0;
+
     for(int i=0; i < 26;i++){
-      if(children[i] && children[i]->isWholeWord())
-        recursiveTotal++;
-      recursiveTotal+=getTotChildWords(children[i], recursiveTotal);
+      const WordNode* child = curr->children[i];
+      if (child) {
+        recursiveTotal += child->_isWholeWord;
+        recursiveTotal += getTotChildWords(child);
+      }
     }
 
     return recursiveTotal;
-
-
   }
 
   /**
-  Returns true if this instance is at the end of a whole word,
-  false otherwise.
+     Returns true if this instance is at the end of a whole word,
+     false otherwise.
   */
   virtual bool isWholeWord() const{ 
-    if(this)
       return _isWholeWord; 
-  }
-
-  void remove(WordNode* curr){
-
-    if(!curr)
-      return;
-
-    for(int i=0; i<26 ; i++)
-      remove(children[i]);
-
-    delete[] children;
-
-
   }
 
   /**
   Virtual destructor.
   */
   virtual ~WordNode(){
-    remove(this);
+    for(int i=0; i<26 ; i++){
+      if(children[i]) {
+        delete children[i];
+        children[i] = NULL;
+      }
+    }  
   }
 
 };
@@ -172,7 +178,10 @@ public:
   */
   virtual WordNode* getNodeForWord(const char* word){    
 
-    return getRoot()->find(getRoot(), word);
+    WordNode* r = getRoot();
+
+    //call recursive function to find word
+    return r->find(r, word);
 
   }
 
@@ -181,10 +190,6 @@ public:
   */
   virtual WordNode* getRoot(){ return &_root; }
 
-  virtual ~DictionaryTree(){
-    getRoot()->remove(getRoot());
-  }
-
-
+  virtual ~DictionaryTree(){}
 };
 

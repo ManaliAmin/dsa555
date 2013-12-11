@@ -15,15 +15,13 @@ Natesh Mayuranathan               							    046643086
 */
 
 #include <vector>
-#include <iterator>
 #include <functional>
 #include <list>
-#include <iostream>
 
-/************************************************************************/
-/* This abstract base class defines pure virtual functions for the tasks
-* that the various hash table implementations must perform
-************************************************************************/
+/*************************************************************************/
+/* This abstract base class defines pure virtual functions for the tasks */
+/* that the various hash table implementations must perform              */ 
+/*************************************************************************/
 template <typename Key_t, typename Val_t> class Table {  
 public:
   virtual Val_t* find(const Key_t& key) = 0;
@@ -89,12 +87,15 @@ public:
 
     Item toInsert(key, val);
 
-    int i = 0;    
+    int i = 0;   
+
+    //find appropriate index for insertion
     if(size() > 0){
       while ( i <size() && toInsert._key > _store[i]._key )
         i++;
     } 
 
+    //perform insertion and rearrange data to conform with sort property
     _store.insert(_store.begin() + i, toInsert);	
 
     return true;
@@ -108,13 +109,12 @@ public:
   virtual bool remove(const Key_t& key){
     if(!find(key)) return false;
 
-    int idx = 0;
-    bool rv = true;
-
-    for(; idx < size() && _store[idx]._key < key ; idx++);
-
-    _store.erase(_store.begin() + idx);
-
+    for(int idx = 0; idx < size(); idx++){
+      if(_store[idx]._key == key){
+        _store.erase(_store.begin() + idx);
+        return true;
+      }
+    }
     return true;
   }
 
@@ -141,105 +141,190 @@ class LPHash : public Table<Key_t, Val_t> {
     Key_t key(){ return _key;}
   };
   std::vector<Item*> _store;
-  int _load;
+  int _numElements;
   std::hash<Key_t> _hash;
 public:
 
-  LPHash(int maxExpected) : _load(0){    
-    _store.resize(1.25 * maxExpected);
-
+  LPHash(int maxExpected) : _numElements(0){  
+    if(maxExpected < 10)
+      maxExpected = 10;
+    _store.resize((int)(1.25 * maxExpected));
   }
 
+  /*********************************************************************/
+  /* Probes table for the key specified in a passed const reference &  */
+  /* returns either a pointer the value at this location or a nullptr  */ 
+  /*********************************************************************/
   virtual Val_t* find(const Key_t& key){
 
+    // find ideal key location
     int end = _store.size();
+    size_t ideal = _hash(key) % end;
 
-    auto ideal = _hash(key) % end;
-    for(int i = 0; i < end && &_store[(i+1) % end]; i++ ){
-      if(_store[(ideal + i) % end]->_key == key){
-        return &_store[(ideal + i) % end]->_val;
-      }
+    // probe table for specified key
+    for(int i = 0; i < end; i++ ){
+      int idx = (ideal + i) % end;
+      // break if an island is found
+      if(!_store[idx])
+        return nullptr;
+      // return the specified value
+      if(_store[idx]->_key == key)
+        return &_store[idx]->_val;        
+
     }
 
     return nullptr;
   }
-  virtual bool insert(const Key_t& key, const Val_t& val) {        
 
+  /************************************************************************/
+  /* Attempts to insert a new item into the table, given const references */
+  /* to a key and a value - returns false if key exists in table          */ 
+  /************************************************************************/
+  virtual bool insert(const Key_t& key, const Val_t& val) {                  
     if (find(key)) return false;    
+
     int end = _store.size();
-    auto ideal = _hash(key) % end;
+    size_t ideal = _hash(key) % end;
     int insertion = -1;
-    int i=0;
 
-    if(_store[ideal]!=NULL){
-      for(i = ideal+1; i < end && insertion < 0; i++){
-        if(!_store[i])
-          insertion = i;
-      }
-      if (i == end){
-        for(i = 0; i < ideal; i++){
-          if(!_store[i])
-            insertion = i;
-        }    
-      }
-    } else
-      insertion = ideal;
+    //locate ideal index of insertion
+    for(int i = 0; i < end && insertion < 0; i++){
+      int idx = (ideal + i) % end;
+      if(!_store[idx])
+        insertion = idx;    
+    }
 
-
+    //perform insertion and increment load
     _store[insertion] = new Item(key, val);
-    _load++;
-    if ( size() == (1.25 * _load))
+    _numElements++;
+
+    //rehash when load factor exceeds tolerance level
+    if ( (1.25 * _numElements) >= _store.size())
       rehash();
 
     return true;
 
   }
+
+  /***********************************************************************
+  * Attempts to remove an item from the table, given const references    *
+  * to a key and a value - returns false if key does not exist in table  *
+  ************************************************************************/
   virtual bool remove(const Key_t& key) {
 
     if(!find(key)) return false;
 
     int end = _store.size();
     auto ideal = _hash(key) % end; 
-    Item toDel = *_store[ideal];
+    Item* toDel = _store[ideal];
     int removal = -1;
-    int i=-1;
 
-    if(toDel->key() == key)
-      removal = ideal;
-    else
-    {
-      for(i = ideal; i < end && removal < 0 ; i++ ){
-        if(_store[i]->_key == key)
-          removal = i;
+    //locate ideal index of removal
+    for(int i = 0; i < end && removal < 0; i++ ){
+      int idx = (ideal + i) % end;
+      if(_store[idx] == NULL)
+        return false;
+      if(_store[idx]->_key == key)
+        removal = idx;
+    }
+
+    //perform removal
+    delete _store[removal];
+    _store[removal] = nullptr;
+
+    int oldRemovalPos = removal;
+
+    //fix 'island' generated by newly emptied position
+    for(int i = 1; i < end; i++){
+      //offset from the position deleted from
+      int idx = (oldRemovalPos + i) % end;      
+
+      //the end of the island has been encountered
+      if (!_store[idx]) break;
+
+      //ideal position for key at current idx
+      size_t iPos = _hash(_store[idx]->_key)%end;      
+
+      //decide if current Item's position should
+      //be swapped with removal index
+      if (shouldMove(idx, removal, iPos)){
+        _store[removal] = _store[idx];
+        _store[idx] = nullptr;        
+        removal = idx;
       }
 
-      if(i == end){
-        for(i = 0 ; i < ideal; i++){
-          if(_store[i]->_key == key)
-            removal = i;
+    }
+
+    //decrement load
+    _numElements--;
+
+    return true;
+
+  }
+
+  /*********************************************************************/
+  /* Recieves integers representing relative positions and determines  */
+  /* whether remove() should perform moves after node deletion         */
+  /*********************************************************************/
+  bool shouldMove(int current, int removal, int ideal){
+
+    bool rv = false;
+
+    if(removal < current){
+      if(ideal <= removal || current < ideal)
+        rv = true;
+    } else if(current < removal){
+      if(current < ideal && ideal <= removal)
+        rv = true;
+    }
+
+    return rv;
+
+  }
+
+  /**************************************************/
+  /*Returns current tally of elements in data store */
+  /**************************************************/
+  virtual int size() const { return _numElements; }
+
+  /***********************************************************************/
+  /* Resizes data store and, through probing, inserts current            */
+  /* data set into new ideal indices                                     */
+  /***********************************************************************/
+  void rehash(){
+
+    //initialise temporary datastore
+    int newCap = (int)(_store.size() * 1.25);
+    int oldCap = _store.size();
+    std::vector<Item*> resized(newCap);    
+
+    //iterate through all store's elements and
+    //perform new insertions
+    for(int i = 0; i < oldCap; i++){
+      int ideal=-1, insertion=-1, end = resized.size();
+      if(_store[i]){
+        ideal = _hash(_store[i]->_key) % newCap;                
+        for(int j = 0; j < end && insertion < 0; j++){
+          int idx = (ideal + j) % end ;
+          if(!resized[idx])
+            insertion = idx;    
         }
+        resized[insertion] = _store[i];
       }
     }
 
-    delete _store[removal];
-    _load--;
-    return true;
+    //re-initialize data store
+    _store.clear();    
+    _store = std::vector<Item*>((int)(oldCap *1.25));
 
+    //assign data to new store
+    _store = resized;
 
-  }
-  virtual int size() const { return _store.size(); }
-
-  void rehash(){
-    std::vector<Item> resized = new std::vector<Item>(2 * _size);
-    for(int i = 0; i < _store.size(); i++)
-      resized[i] = _store[i];
   }
 
   virtual ~LPHash(){
-    for(int i = store.size()-1; i =0 ; i--)
-      remove(store[i]._key);
-
-    delete[] _store;
+    for(int i = _store.size()-1; i =0 ; i--)
+      remove(_store[i]->_key);
   }
 
 };
@@ -252,86 +337,142 @@ class ChainHash : public Table<Key_t, Val_t> {
   struct Item
   {
     Key_t _key;
-    Val_t _val;    
+    Val_t _val;
+
+    Item(Key_t k, Val_t v) : _key(k), _val(v){}
+
   };  
   std::vector<std::list<Item*>> _store;
-  std::hash<Key_t> _hash;
-  //maximum elements in table
-  int _capacity;
-  //maximum acceptable load of each bucket
-  int _maxload;  
-  int _buckets;
+  std::hash<Key_t> _hash;  
+  int _numElements;
+  static const int bucketSize = 50;
 public:
 
-  ChainHash(int maxExpected){
-    _capacity = 1.25 * maxExpected;
-    _buckets = 10;
-    _maxload = maxExpected / _buckets;
-    _store.reserve(1.25*maxExpected);    
+  ChainHash(int maxExpected) : _numElements(0){            
+    if(maxExpected < 10)
+      maxExpected = 10;
+    _store.resize((int)(1.25 * maxExpected)/bucketSize);    
   }
 
-  virtual Val_t* find(const Key_t& key) {            
-    auto ideal = _hash(key) % _capacity;
+  /*********************************************************************/
+  /* Iterates through all buckets for the key specified in a passed    */ 
+  /* const reference and returns either a pointer the value at this    */ 
+  /* location or a nullptr                                             */ 
+  /*********************************************************************/
+  virtual Val_t* find(const Key_t& key) {    
 
-    std::list<Item*> list = &_store.at(ideal);
+    size_t ideal = _hash(key) % _store.size();   
 
-    if(list->size()){
-      for(std::list::iterator i = list->begin(); i != list->end(); i++){
-        if((*i)->_key == key)
-          return (*i)->_value;
-      }      
-    }
+    std::list<Item*>& list = _store[ideal];
+
+    std::list<Item*>::iterator it = list.begin();
+
+    while(it!=list.end()){      
+      if((*it)->_key == key)
+        return &(*it)->_val;
+      it++;
+    }   
 
     return nullptr;
 
   }
+
+  /************************************************************************/
+  /* Attempts to insert a new item into the table, given const references */
+  /* to a key and a value - returns false if key exists in table          */ 
+  /************************************************************************/
   virtual bool insert(const Key_t& key, const Val_t& val) {
+
     if(find(key))return false;
 
-    auto ideal = _hash(key) % _capacity;
-    int size = _store[ideal].size();
+    //rehash if load exceeds tolerance level
+    if( (1.25 * _numElements) >= _store.size())
+      rehash();
 
-    _store[ideal].push_back(new Item(key, val));
+    //find ideal insertion location
+    size_t ideal = _hash(key) % _store.size();
+    int size = _store[ideal].size();   
 
-    if(_store[ideal].size() == _maxload)
-      resize();
+    Item* toAdd = new Item(key, val);
 
+    //perform insertion and increment 
+    _store[ideal].push_back(toAdd);
+    _numElements++;
+
+    return true;
 
   }
+
+  /************************************************************************/
+  /* Attempts to remove an item from the table, given const references    */
+  /* to a key and a value - returns false if key exists in table          */ 
+  /************************************************************************/
   virtual bool remove(const Key_t& key) {
 
     if(!find(key)) return false;
-    
 
-    auto ideal = _hash(key) % _capacity;
-    int size = _store[ideal].size();
-    Item tmp = nullptr;
+    //find expected removal index
+    auto ideal = _hash(key) % _store.size();    
+    //Item* tmp = nullptr;
+    std::list<Item*>& list = _store[ideal];
 
-    for(std::list<Item>::iterator i = _store[ideal].begin(); i < _store[i].end(); i++){      
-      if(*i._key == key){
-        tmp = *i;
-        *i-1
-
+    //iterate through list to perform removal
+    for(auto i = _store[ideal].begin(); i != _store[ideal].end(); i++){      
+      if((*i)->_key == key){
+        _store[ideal].erase(i);
+        _numElements--;
+        return true;
       }
 
     }
 
   }
-  virtual int size() const {return _capacity;}
+
+  /*************************************/
+  /* Returns current size of data set  */
+  /*************************************/
+  virtual int size() const {return _numElements;}
+
   virtual ~ChainHash(){
-    for(int i = 0; i < _capacity; i++)
+    for(int i = 0; i < _store.size(); i++)
       _store[i].clear();
   }
 
-  void resize(){    
-    int expanded = _capacity * 2;
-    std::vector<std::list<Item>> resized = new std::vector<std::list<Item>>(expanded);    
-    _maxload = (expanded/1.25)/10;
+  /***********************************************************************/
+  /* Resizes data store and, through chaining into ideal bucket lists,   */  
+  /* insert current data set into new ideal locations                    */
+  /***********************************************************************/
+  void rehash(){    
 
-    for(int i = 0; i < _capacity; i++){
-      if(_store[i].begin())
-        resized[i] = _store[i];
+    //initialise temporary datastore
+    int newCap = _store.size() * 2;    
+    int oldCap = _store.size();    
+    std::vector<std::list<Item*>> resized;    
+    resized.resize(newCap);
+
+    //create teporary list item for copying values from old to new store
+    std::list<Item*> list;       
+
+    //iterate through old store, copying items to ideal locations in new store
+    for(int i = 0; i < oldCap; i++){
+      int ideal = -1, insertion = -1, end = resized.size();      
+      list = _store[i];
+      std::list<Item*>::iterator it = list.begin();     
+
+      while(it != list.end()){        
+        ideal = _hash((*it)->_key) % end;
+        resized[ideal].push_back(*it);
+        it++;
+      }
+
     }
+
+    //re-initialize data store
+    _store.clear();
+    _store = std::vector<std::list<Item*>>(newCap);   
+
+    //assign copied data to new store
+    _store = resized;    
 
   }
 

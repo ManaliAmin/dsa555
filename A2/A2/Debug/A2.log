@@ -1,55 +1,33 @@
-﻿Build started 11/22/2013 11:15:45 AM.
-     1>Project "C:\Users\nmayuranathan\Downloads\dsa555-master\dsa555-master\A2\A2\A2.vcxproj" on node 2 (Build target(s)).
+﻿Build started 12/7/2013 6:43:05 PM.
+     1>Project "E:\Documents\Code\repos\dsa555\A2\A2\A2.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt a2tester.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt a2tester.cpp
          a2tester.cpp
-     1>c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(144): warning C4244: 'argument' : conversion from 'double' to 'unsigned int', possible loss of data
-                 c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(143) : while compiling class template member function 'LPHash<Key_t,Val_t>::LPHash(int)'
+     1>e:\documents\code\repos\dsa555\a2\a2\table.h(433): warning C4018: '<' : signed/unsigned mismatch
+                 e:\documents\code\repos\dsa555\a2\a2\table.h(432) : while compiling class template member function 'ChainHash<Key_t,Val_t>::~ChainHash(void)'
                  with
                  [
                      Key_t=std::string,
                      Val_t=int
                  ]
-                 c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\a2tester.cpp(226) : see reference to function template instantiation 'LPHash<Key_t,Val_t>::LPHash(int)' being compiled
+                 e:\documents\code\repos\dsa555\a2\a2\a2tester.cpp(236) : see reference to function template instantiation 'ChainHash<Key_t,Val_t>::~ChainHash(void)' being compiled
                  with
                  [
                      Key_t=std::string,
                      Val_t=int
                  ]
-                 c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\a2tester.cpp(226) : see reference to class template instantiation 'LPHash<Key_t,Val_t>' being compiled
+                 e:\documents\code\repos\dsa555\a2\a2\a2tester.cpp(236) : see reference to class template instantiation 'ChainHash<Key_t,Val_t>' being compiled
                  with
                  [
                      Key_t=std::string,
                      Val_t=int
                  ]
-     1>c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(168): error C2451: conditional expression of type 'LPHash<Key_t,Val_t>::Item' is illegal
-                 with
-                 [
-                     Key_t=std::string,
-                     Val_t=int
-                 ]
-                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
-                 c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(161) : while compiling class template member function 'bool LPHash<Key_t,Val_t>::insert(const Key_t &,const Val_t &)'
-                 with
-                 [
-                     Key_t=std::string,
-                     Val_t=int
-                 ]
-     1>c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(169): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(170): error C2675: unary '!' : 'LPHash<Key_t,Val_t>::Item' does not define this operator or a conversion to a type acceptable to the predefined operator
-                 with
-                 [
-                     Key_t=std::string,
-                     Val_t=int
-                 ]
-     1>c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(173): error C2065: 'i' : undeclared identifier
-     1>c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(174): error C2065: 'i' : undeclared identifier
-     1>c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(175): error C2065: 'i' : undeclared identifier
-     1>c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(176): error C2065: 'i' : undeclared identifier
-     1>c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(183): error C2065: '_key' : undeclared identifier
-     1>c:\users\nmayuranathan\downloads\dsa555-master\dsa555-master\a2\a2\table.h(183): error C2065: '_val' : undeclared identifier
-     1>Done Building Project "C:\Users\nmayuranathan\Downloads\dsa555-master\dsa555-master\A2\A2\A2.vcxproj" (Build target(s)) -- FAILED.
+     1>e:\documents\code\repos\dsa555\a2\a2\table.h(430): warning C4715: 'ChainHash<std::basic_string<char,std::char_traits<char>,std::allocator<char> >,int>::remove' : not all control paths return a value
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\Documents\Code\repos\dsa555\A2\Debug\A2.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\Documents\Code\repos\dsa555\A2\Debug\A2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Documents\Code\repos\dsa555\A2\Debug\A2.lib" /MACHINE:X86 Debug\a2tester.obj
+         A2.vcxproj -> E:\Documents\Code\repos\dsa555\A2\Debug\A2.exe
+     1>Done Building Project "E:\Documents\Code\repos\dsa555\A2\A2\A2.vcxproj" (Build target(s)).
 
-Build FAILED.
+Build succeeded.
 
-Time Elapsed 00:00:01.03
+Time Elapsed 00:00:01.08

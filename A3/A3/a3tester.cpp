@@ -147,9 +147,9 @@ bool testPart4CountChildWords(DictionaryTree& tree, fstream& wordsStream){
 
     regex reg;
     string word, word2, temp;
+    int counter = 0;
     wordsStream.clear();
     wordsStream.seekg(0);
-    int counter = 0;
     while (getline(wordsStream, word), !wordsStream.fail()){
         if (!word.size()) continue;
         trim(word);
@@ -163,7 +163,7 @@ bool testPart4CountChildWords(DictionaryTree& tree, fstream& wordsStream){
         // Manually count number of child words
         size_t numWords = 0;
         while (getline(wordsStream, word2), trim(word2),
-            !wordsStream.fail() && regex_match(word2, reg)) numWords++;
+          !wordsStream.fail() && regex_match(word2, reg)) numWords++;
 
         // Count is correct?
         iWordNode* wordNode = tree.getNodeForWord(word.c_str());
@@ -202,7 +202,7 @@ int main()
 
     // Get list of words
     msg("Opening words.txt");
-    fstream wordsStream("words.txt", fstream::in);
+    fstream wordsStream("words.txt", fstream::in | fstream::binary);
 
     if (wordsStream.fail()) {
         ss << "Failed to open words.txt, aborting...";
@@ -212,7 +212,6 @@ int main()
 
     msg("Creating empty dictionary tree...");
     DictionaryTree tree;
-
     if (overallSuccess) testPart1AllWordsReturnNull(tree, wordsStream);
     if (overallSuccess) testPart2NullThenInsertThenNotNull(tree, wordsStream);
     if (overallSuccess) testPart3NavigateWordManually(tree, wordsStream);

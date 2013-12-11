@@ -1,6 +1,6 @@
-#define TEST_SIMPLE 0       // Set this to 0 to turn off testing of simple table
+#define TEST_SIMPLE 1       // Set this to 0 to turn off testing of simple table
 #define TEST_LPHASH 1       // Set this to 0 to turn off testing of LPHash table
-#define TEST_CHAINHASH 0    // Set this to 0 to turn off testing of ChainHash table
+#define TEST_CHAINHASH 1    // Set this to 0 to turn off testing of ChainHash table
 
 #include "table.h"
 
@@ -167,6 +167,8 @@ bool testTable(const std::string& name, Table<Key_t, int>& table, KeyGen_t& keyG
     ss << name << " Basic Tests (Only upto maxExpected elements where maxExpected is " << MAX_EXPECTED << ")";
     h1w();
     testBattery<Key_t, KeyGen_t>(MAX_EXPECTED - 1, table, keyGen);
+
+    //isRehashBonus = false;
 
     // Attempt to bonus
     if (success) {

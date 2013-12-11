@@ -1,4 +1,4 @@
-#define TEST_RECURSION 0    // 1 tests recursion component, 0 does not
+#define TEST_RECURSION 1    // 1 tests recursion component, 0 does not
 #define TEST_LIST 1         // 1 tests linked list component, 0 does not
 
 #include <cstdint>

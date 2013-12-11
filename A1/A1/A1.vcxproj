@@ -64,9 +64,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Iterator.h" />
     <ClInclude Include="list.h" />
-    <ClInclude Include="Node.h" />
     <ClInclude Include="recurse.hpp" />
     <ClInclude Include="tester.hpp" />
   </ItemGroup>
