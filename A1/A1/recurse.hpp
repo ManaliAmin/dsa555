@@ -26,29 +26,16 @@ public:
       _cols = width;      
       
       //initialize empty arrays
-      _values = new unsigned int[dataLen];
+      _values = new unsigned int[_size];
       _visited = new bool[_size];
 
       //create copy of data and an array of falses
       for (int i=0; i <= _rows; i++){
         for(int j = 0 ; j <= _cols; j++){
-          _values[i*j] = data[i*j];     
-          _visited[i*j] = false;
+          _values[(i*j) + j ] = data[(i*j) + j];     
+          _visited[(i*j) + j] = false;
         }
       }
-
-      /*
-
-      What about:
-
-      for (int i = 0 ; i <= _rows; i++){
-        _values[i] = new unsigned int[_cols+1];
-        _visited[i] = new bool[cols+1];
-        for(int j = 0 ; j<= _cols; j++)
-          _values[i][j] = data[i+j];
-        
-      }
-      /*   
       
     }
   }
@@ -92,9 +79,9 @@ public:
 
     if(row > 0 && row <= _rows && col > 0 && col <= _cols && !_visited[row * col]){
 
-      _visited[row * col] = true;
+      _visited[(row * col) + col] = true;
       
-      unsigned int val = _values[row * col];
+      unsigned int val = _values[(row * col) + col];
 
       if(val > lowerBound && val < upperBound)
         return val + recursiveSum(lowerBound, upperBound, row-1, col) 

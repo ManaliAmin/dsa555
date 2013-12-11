@@ -141,21 +141,19 @@ public:
   /* Copy constructor */
   /********************/  
   LinkedList(const LinkedList& other){
-    if(other._sentinel){
-      delete _sentinel;
-      *this = other;
-    }
+    *this = other;
   }
 
   /***********************/
   /* Assignment operator */
   /***********************/
   LinkedList& operator=(const LinkedList& other){
-    if(other._sentinel){
-      clear();
-      delete _sentinel;
-      _sentinel = other._sentinel;
+
+    if(*this->_sentinel != other->_sentinel){
+      for(auto i = other.begin(); i != other.end(); i++)
+        push_back(*i);
     }
+
     return *this;
   }
 
