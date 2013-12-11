@@ -6,8 +6,8 @@
 class RecursiveSolver
 {
 private:
-  unsigned int* _values;
-  bool* _visited;
+  unsigned int* _values;//make double ptrs? (2d arrays)
+  bool* _visited;       //
   int _rows;
   int _cols;
   int _size;
@@ -36,6 +36,19 @@ public:
           _visited[i*j] = false;
         }
       }
+
+      /*
+
+      What about:
+
+      for (int i = 0 ; i <= _rows; i++){
+        _values[i] = new unsigned int[_cols+1];
+        _visited[i] = new bool[cols+1];
+        for(int j = 0 ; j<= _cols; j++)
+          _values[i][j] = data[i+j];
+        
+      }
+      /*   
       
     }
   }
